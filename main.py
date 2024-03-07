@@ -1,6 +1,10 @@
 import streamlit as st
 import datetime
 import pandas as pd
+from io import BytesIO
+from pyxlsb import open_workbook as open_xlsb
+import io
+buffer = io.BytesIO()
 
 @st.cache_resource
 
@@ -59,9 +63,29 @@ clr_form_btn = st.button('New Form', on_click=clearForm)
 if add_new_info_button:
     get_record().append({"Date": date, "Visitor Name": visitor_name, "Telephone": telephone, "Address": address, "Purpose":purpose, "Department": department, "Time In": timeIn, "Time Out": timeOut})
 
+df = pd.DataFrame(get_record())
+
+edited_df = st.data_editor(df)
+
+new_time_in = edited_df.loc[edited_df["Time Out"].idxmax()]
+
 if view_record:
     st.write(pd.DataFrame(get_record()))
 
+# @st.cache_resource
+# def convert_to_csv(df):
+#     # IMPORTANT: Cache the conversion to prevent computation on every rerun
+#     return df.to_csv(index=False).encode('utf-8')
 
+# csv = convert_to_csv(df)
 
-
+# with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+#     # Write each dataframe to a different worksheet.
+#     df.to_excel(writer, sheet_name='Sheet1', index=False)
+#     writer.save()
+#     download2 = st.download_button(
+#         label="Download data as Excel",
+#         data=buffer,
+#         file_name='large_df.xlx',
+#         mime='application/vnd.ms-excel'
+#     )
